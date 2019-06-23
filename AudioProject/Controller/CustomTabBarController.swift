@@ -28,8 +28,12 @@ class CustomTabBarController: UITabBarController {
         profileNavicontroller.title = "Profile"
         profileNavicontroller.tabBarItem.image = #imageLiteral(resourceName: "users-3")
         
+        let historyController = HistoryController()
+        let historyNavicontroller = UINavigationController(rootViewController: historyController)
+        historyNavicontroller.title = "Orders"
+        historyNavicontroller.tabBarItem.image = #imageLiteral(resourceName: "medical-history")
         
-        self.viewControllers = [homeNaviController,menuNaviController,profileNavicontroller]
+        self.viewControllers = [homeNaviController,menuNaviController,historyNavicontroller,profileNavicontroller]
         self.tabBar.tintColor = #colorLiteral(red: 0.9607843161, green: 0.7058823705, blue: 0.200000003, alpha: 1)
         self.tabBar.isTranslucent = false
         // Do any additional setup after loading the view.

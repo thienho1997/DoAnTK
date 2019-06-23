@@ -110,9 +110,13 @@ class CartViewController: UIViewController, UITableViewDelegate, UITableViewData
     }()
     
     @objc func buttonAction(){
-        print("button Tapped")
+        print(123)
+        let orderDetailController = OrderDetailController()
+        orderDetailController.products = products
+        orderDetailController.totalPrice = lableTotalPrice.text
+        self.navigationController?.pushViewController(orderDetailController, animated: true)
     }
-    let buttonContinue: UIButton = {
+    lazy var buttonContinue: UIButton = {
         let bt = UIButton(type: UIButton.ButtonType.system)
         bt.translatesAutoresizingMaskIntoConstraints = false
         bt.setTitle("Continue", for: UIControl.State.normal)
@@ -121,6 +125,7 @@ class CartViewController: UIViewController, UITableViewDelegate, UITableViewData
         bt.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         bt.clipsToBounds = true
         bt.backgroundColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
+        bt.addTarget(self, action: #selector(buttonAction), for: UIControl.Event.touchUpInside)
         return bt
     }()
     func setUpView(){

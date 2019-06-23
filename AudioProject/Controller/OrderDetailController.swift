@@ -8,15 +8,108 @@
 
 import UIKit
 import DLRadioButton
-class OrderDetailController: UIViewController, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
-    let cellId = "cellId"
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+import Firebase
+class OrderDetailController: UIViewController, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource, UITableViewDelegate, UITableViewDataSource {
+    let cellTableId = "celltableid"
+    var adrresses = [Adrress]()
+    var tables = [Table]()
+    var products = [Product]()
+    var totalPrice: String?
+    func fetchTables(){
+        let ref = Database.database().reference().child("tables")
+        ref.observe(DataEventType.childAdded) { (snapShot) in
+            if let dictionary = snapShot.value as? [String: AnyObject]{
+                let table = Table(dictionary: dictionary)
+                self.tables.append(table)
+                DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+                }
+            }
+        }
+    }
+    func fetchAdrress() {
+        let uid = Auth.auth().currentUser?.uid
+        let ref = Database.database().reference().child("user_addrresses").child(uid!)
+        ref.observe(DataEventType.childAdded) { (snap) in
+            let addressId = snap.key
+            
+            let refAd = Database.database().reference().child("addrresses").child(addressId)
+            refAd.observeSingleEvent(of: DataEventType.value, with: { (snapShot) in
+                if let dictionary = snapShot.value as? [String: AnyObject]{
+                    let address = Adrress(dictionary: dictionary)
+                    print(address.name)
+                    self.adrresses.append(address)
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                }
+            })
+        }
+    }
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return adrresses.count
     }
     
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellTableId, for: indexPath) as! AddressCell
+        cell.address = adrresses[indexPath.row]
+        return cell
+    }
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return CGFloat(85)
+    }
+    
+    let cellId = "cellId"
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return tables.count
+    }
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath)
+    {
+        if tables[indexPath.item].time_stamp == 0
+        {
+        let table_name = tables[indexPath.item].name
+         let alertController = UIAlertController(title: "Thông báo", message: "Bạn có chắc chắn chọn bàn \(table_name) với giỏ hàng đã chọn không?", preferredStyle: UIAlertController.Style.alert)
+        let cancelAction = UIAlertAction(title: "Huỷ", style: UIAlertAction.Style.default, handler: {
+            (action : UIAlertAction!) -> Void in })
+        let agreeAction = UIAlertAction(title: "Đồng ý", style: UIAlertAction.Style.default, handler: { alert -> Void in
+             let timestamp = Int(Date().timeIntervalSince1970)
+            let table = self.tables[indexPath.item]
+            let value = ["id": (table.id)!,"name": (table.name)!, "max_numb": (table.max_numb)!,"time_stamp": timestamp] as [String:Any]
+            let ref = Database.database().reference().child("tables").child(table.id!)
+            ref.updateChildValues(value)
+            
+            // update carts
+            let refCarts = Database.database().reference().child("carts").childByAutoId()
+            for item in self.products {
+            let value = [item.id : item.numb!]
+            refCarts.updateChildValues(value)
+            }
+            
+            // update user bills
+            let uid = Auth.auth().currentUser?.uid
+            let refUserBills = Database.database().reference().child("user_bills").child(uid!).childByAutoId()
+            let valueBill = ["id": refUserBills.key! , "id_cart": refCarts.key! , "id_table": table.id!, "active": 1,"totalPrice": self.totalPrice!] as [String: Any]
+            refUserBills.updateChildValues(valueBill)
+            
+            // remove user_cart
+            let refUserCart = Database.database().reference().child("users_cart")
+            refUserCart.removeValue()
+        })
+        alertController.addAction(agreeAction)
+        alertController.addAction(cancelAction)
+         self.present(alertController, animated: true, completion: nil)
+        }
+        else{
+            let alertController = UIAlertController(title: "Thông báo", message: "Bàn đã được dùng, vui lòng chọn bàn khác!", preferredStyle: UIAlertController.Style.alert)
+            let cancelAction = UIAlertAction(title: "Đồng ý", style: UIAlertAction.Style.default, handler: {
+                (action : UIAlertAction!) -> Void in })
+            alertController.addAction(cancelAction)
+            self.present(alertController, animated: true, completion: nil)
+        }
+    }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! TableCell
-        cell.backgroundColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
+         cell.table = tables[indexPath.item]
         return cell
     }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -93,11 +186,93 @@ class OrderDetailController: UIViewController, UICollectionViewDelegate, UIColle
         cv.register(TableCell.self, forCellWithReuseIdentifier: cellId)
         return cv;
     }()
+    lazy var buttonADress: UIButton = {
+        
+        let button = UIButton(type: UIButton.ButtonType.system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.backgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        button.setTitleColor(#colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1), for: UIControl.State.normal)
+        button.layer.borderColor = #colorLiteral(red: 0.9372549057, green: 0.3490196168, blue: 0.1921568662, alpha: 1)
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 15)
+        button.layer.borderWidth = 1
+        button.layer.cornerRadius = 10
+        button.clipsToBounds = true
+        button.setTitle("+Add new address", for: .normal)
+       // button.addTarget(self, action: #selector(addNewAddress), for: .touchUpInside)
+        button.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(addNewAddress)))
+        return button
+    }()
+    lazy var tableView: UITableView = {
+        let tb = UITableView()
+        tb.delegate = self
+        tb.dataSource = self
+        tb.register(AddressCell.self, forCellReuseIdentifier: cellTableId)
+        tb.translatesAutoresizingMaskIntoConstraints = false
+        tb.backgroundColor = #colorLiteral(red: 0.921431005, green: 0.9214526415, blue: 0.9214410186, alpha: 1)
+        //footer
+        let containView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 70))
+        let customView = UIView(frame: CGRect(x: 0, y: 20, width: view.frame.width, height: 50))
+        containView.backgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        containView.addSubview(customView)
+        containView.isUserInteractionEnabled = true
+        customView.isUserInteractionEnabled = true
+        // customView.backgroundColor = #colorLiteral(red: 0.9144216313, green: 0.9144216313, blue: 0.9144216313, alpha: 1)
+        
+        
+        
+        customView.addSubview(buttonADress)
+        buttonADress.centerYAnchor.constraint(equalTo: customView.centerYAnchor).isActive = true
+        buttonADress.centerXAnchor.constraint(equalTo: customView.centerXAnchor).isActive = true
+        buttonADress.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        buttonADress.widthAnchor.constraint(equalToConstant: 150).isActive = true
+        
+        tb.tableFooterView = containView
+        
+        return tb
+    }()
+   @objc func addNewAddress(){
+    let alertController = UIAlertController(title: "Add New Adrress", message: "", preferredStyle: UIAlertController.Style.alert)
+    alertController.addTextField { (textField : UITextField!) -> Void in
+        textField.placeholder = "Enter name"
+    }
+    let saveAction = UIAlertAction(title: "Add", style: UIAlertAction.Style.default, handler: { alert -> Void in
+        
+        let name = alertController.textFields![0] as UITextField
+        let address = alertController.textFields![1] as UITextField
+        let phoneNumber = alertController.textFields![2] as UITextField
+        
+        let ref = Database.database().reference().child("addrresses").childByAutoId()
+        let value = ["name":name.text!,"address": address.text!, "phone_number": phoneNumber.text,"id":ref.key!] as [String : Any]
+        ref.updateChildValues(value, withCompletionBlock: { (error, dataRef) in
+            if (error != nil){
+                print(error!)
+            }
+            let uid = Auth.auth().currentUser?.uid
+            let ref = Database.database().reference().child("user_addrresses").child(uid!).child(dataRef.key!)
+            ref.setValue(1)
+            
+        })
+        
+        
+    })
+    let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertAction.Style.default, handler: {
+        (action : UIAlertAction!) -> Void in })
+    alertController.addTextField { (textField : UITextField!) -> Void in
+        textField.placeholder = "Enter address"
+    }
+    alertController.addTextField { (textField : UITextField!) -> Void in
+        textField.placeholder = "Enter phone number"
+    }
+    alertController.addAction(saveAction)
+    alertController.addAction(cancelAction)
+    
+    self.present(alertController, animated: true, completion: nil)
+    }
     func setUpView(){
-        let heightStatusB = UIApplication.shared.statusBarFrame.height
+       // let heightStatusB = UIApplication.shared.statusBarFrame.height
         //let heightNavi = (self.navigationController?.navigationBar.frame.height)!
         view.addSubview(labelOderType)
-        labelOderType.topAnchor.constraint(equalTo: view.topAnchor, constant: heightStatusB+16).isActive = true
+        labelOderType.topAnchor.constraint(equalTo: view.topAnchor, constant: 16).isActive = true
         labelOderType.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16).isActive = true
         labelOderType.heightAnchor.constraint(equalToConstant: 25).isActive = true
         labelOderType.widthAnchor.constraint(equalToConstant:200).isActive = true
@@ -138,18 +313,37 @@ class OrderDetailController: UIViewController, UICollectionViewDelegate, UIColle
         collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         collectionView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         collectionView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        
+        view.addSubview(tableView)
+        tableView.topAnchor.constraint(equalTo: labelReservation.bottomAnchor,constant: 16).isActive = true
+        tableView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        tableView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0).isActive = true
+        
     }
     @objc func btDeliveryAction(){
       radioButton2.isSelected = false
+        radioButton1.isSelected = true
+      tableView.isHidden = false
+        collectionView.isHidden = true
     }
     @objc func btReservationAction(){
         radioButton1.isSelected = false
+        tableView.isHidden = true
+        collectionView.isHidden = false
     }
     override func viewDidLoad() {
         super.viewDidLoad()
-       
+        self.navigationItem.title = "Order Detail"
+        self.navigationController?.navigationBar.barTintColor = #colorLiteral(red: 1, green: 0.5781051517, blue: 0, alpha: 1)
+        self.navigationController?.navigationBar.isTranslucent = false
+        let textAttributes = [NSAttributedString.Key.foregroundColor:#colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0), NSAttributedString.Key.font:UIFont.boldSystemFont(ofSize: 23)] as [NSAttributedString.Key : Any]
+        navigationController?.navigationBar.titleTextAttributes = textAttributes
+        btDeliveryAction()
         self.view.backgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
          setUpView()
+        fetchAdrress()
+        fetchTables()
         // Do any additional setup after loading the view.
     }
     
@@ -158,9 +352,78 @@ class OrderDetailController: UIViewController, UICollectionViewDelegate, UIColle
 
 }
 class TableCell: UICollectionViewCell {
+    var table:Table?{
+        didSet{
+            if table?.time_stamp == 0 {
+                backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
+                labelTime.text = "Available"
+            }
+            else{
+                if let seconds = table?.time_stamp?.doubleValue {
+                    let secondDistance = Int(Date().timeIntervalSince1970) - Int(seconds)
+                let (h,m,s) = secondsToHoursMinutesSeconds (seconds : secondDistance)
+                   if h != 0 {
+                    labelTime.text = "\(h) hours \(m) minutes \(s) seconds"
+                    }
+                    else if m != 0 {
+                     labelTime.text = "\(m) minutes \(s) seconds"
+                    }
+                    else{
+                    labelTime.text = "\(s) seconds"
+                    }
+                }
+                
+            }
+            labelName.text = table?.name
+            labelMaxNumb.text = "Max people: \((table?.max_numb)!)"
+        }
+    }
+    let labelName: UILabel = {
+        let lb = UILabel()
+        lb.translatesAutoresizingMaskIntoConstraints = false
+        lb.font = UIFont.boldSystemFont(ofSize: 15)
+        lb.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        return lb
+    }()
+    func secondsToHoursMinutesSeconds (seconds : Int) -> (Int, Int, Int) {
+        return (seconds / 3600, (seconds % 3600) / 60, (seconds % 3600) % 60)
+    }
+    let labelMaxNumb: UILabel = {
+        let lb = UILabel()
+        lb.translatesAutoresizingMaskIntoConstraints = false
+        lb.font = UIFont.boldSystemFont(ofSize: 14)
+         lb.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        return lb
+    }()
+    let labelTime : UILabel = {
+        let lb = UILabel()
+        lb.translatesAutoresizingMaskIntoConstraints = false
+        lb.font = UIFont.boldSystemFont(ofSize: 15)
+        lb.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        return lb
+    }()
     func setUpView(){
+        self.backgroundColor = #colorLiteral(red: 0.8078431487, green: 0.02745098062, blue: 0.3333333433, alpha: 1)
         self.layer.cornerRadius = 10
         self.clipsToBounds = true
+        
+        addSubview(labelName)
+        labelName.topAnchor.constraint(equalTo: topAnchor, constant: 4).isActive = true
+        labelName.leftAnchor.constraint(equalTo: leftAnchor, constant: 4).isActive = true
+        labelName.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        labelName.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+        
+        addSubview(labelMaxNumb)
+        labelMaxNumb.topAnchor.constraint(equalTo: labelName.bottomAnchor, constant: 4).isActive = true
+        labelMaxNumb.leftAnchor.constraint(equalTo: leftAnchor, constant: 4).isActive = true
+        labelMaxNumb.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        labelMaxNumb.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+        
+        addSubview(labelTime)
+        labelTime.topAnchor.constraint(equalTo: labelMaxNumb.bottomAnchor, constant: 4).isActive = true
+        labelTime.leftAnchor.constraint(equalTo: leftAnchor, constant: 4).isActive = true
+        labelTime.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        labelTime.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
     }
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -171,3 +434,5 @@ class TableCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 }
+
+

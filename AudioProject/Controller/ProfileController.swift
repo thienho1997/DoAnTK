@@ -11,23 +11,56 @@ import Firebase
 
 class ProfileController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 0
+        return adrresses.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! AddressCell
+        cell.address = adrresses[indexPath.row]
         return cell
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return CGFloat(72)
+        return CGFloat(85)
     }
-
+    var adrresses = [Adrress]()
+    func fetchAdrress() {
+        let uid = Auth.auth().currentUser?.uid
+        let ref = Database.database().reference().child("user_addrresses").child(uid!)
+        ref.observe(DataEventType.childAdded) { (snap) in
+            let addressId = snap.key
+            
+            let refAd = Database.database().reference().child("addrresses").child(addressId)
+            refAd.observeSingleEvent(of: DataEventType.value, with: { (snapShot) in
+                if let dictionary = snapShot.value as? [String: AnyObject]{
+                    let address = Adrress(dictionary: dictionary)
+                    print(address.name)
+                    self.adrresses.append(address)
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                }
+            })
+        }
+    }
+    func fetchUser(){
+        let uid = Auth.auth().currentUser?.uid
+        
+        let ref = Database.database().reference().child("users").child(uid!)
+        ref.observeSingleEvent(of: DataEventType.value) { (snap) in
+            if let dictionary = snap.value as? [String: AnyObject]{
+                let user = User(dictionary: dictionary)
+                self.nameLabel.text = user.name
+                self.emailLabel.text = user.email
+                self.imageViewProfile.loadImageUsingCacheWithUrlString(urlString: user.urlImage!)
+            }
+        }
+    }
     let imageViewProfile: UIImageView = {
         let iv = UIImageView()
         iv.translatesAutoresizingMaskIntoConstraints = false
         iv.layer.cornerRadius = 35
         iv.clipsToBounds = true
-        iv.image = #imageLiteral(resourceName: "ma19tr101-2")
+       // iv.image = #imageLiteral(resourceName: "ma19tr101-2")
       //  iv.backgroundColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
         iv.contentMode = .scaleAspectFill
         return iv
@@ -171,7 +204,7 @@ class ProfileController: UIViewController, UITableViewDelegate, UITableViewDataS
         button.layer.cornerRadius = 10
         button.clipsToBounds = true
         button.setTitle("+Add new address", for: .normal)
-      //  button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
+        button.addTarget(self, action: #selector(buttonAddDressAction), for: .touchUpInside)
         
         
         customView.addSubview(button)
@@ -184,6 +217,44 @@ class ProfileController: UIViewController, UITableViewDelegate, UITableViewDataS
         
         return tb
     }()
+    @objc func buttonAddDressAction(){
+        let alertController = UIAlertController(title: "Add New Adrress", message: "", preferredStyle: UIAlertController.Style.alert)
+        alertController.addTextField { (textField : UITextField!) -> Void in
+            textField.placeholder = "Enter name"
+        }
+        let saveAction = UIAlertAction(title: "Add", style: UIAlertAction.Style.default, handler: { alert -> Void in
+            
+            let name = alertController.textFields![0] as UITextField
+            let address = alertController.textFields![1] as UITextField
+            let phoneNumber = alertController.textFields![2] as UITextField
+            
+            let ref = Database.database().reference().child("addrresses").childByAutoId()
+            let value = ["name":name.text!,"address": address.text!, "phone_number": phoneNumber.text,"id":ref.key!] as [String : Any]
+            ref.updateChildValues(value, withCompletionBlock: { (error, dataRef) in
+                if (error != nil){
+                    print(error!)
+                }
+                let uid = Auth.auth().currentUser?.uid
+                let ref = Database.database().reference().child("user_addrresses").child(uid!).child(dataRef.key!)
+                ref.setValue(1)
+                
+            })
+            
+            
+        })
+        let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertAction.Style.default, handler: {
+            (action : UIAlertAction!) -> Void in })
+        alertController.addTextField { (textField : UITextField!) -> Void in
+            textField.placeholder = "Enter address"
+        }
+        alertController.addTextField { (textField : UITextField!) -> Void in
+            textField.placeholder = "Enter phone number"
+        }
+        alertController.addAction(saveAction)
+        alertController.addAction(cancelAction)
+        
+        self.present(alertController, animated: true, completion: nil)
+    }
     lazy var buttonLogOut: UIButton = {
         let bt = UIButton(type: UIButton.ButtonType.system)
         bt.translatesAutoresizingMaskIntoConstraints = false
@@ -243,15 +314,83 @@ class ProfileController: UIViewController, UITableViewDelegate, UITableViewDataS
         self.navigationItem.title = "Profile"
         
         setUpView()
+        fetchUser()
+        fetchAdrress()
         // Do any additional setup after loading the view.
     }
     
 }
 class AddressCell: UITableViewCell
 {
+    var address: Adrress?{
+        didSet{
+            nameLabel.text = address?.name
+            addressLabel.text = address?.adrress
+            phoneNumberLabel.text = address?.phoneNumber
+        }
+    }
+    let editButton: UIButton = {
+        let bt = UIButton(type: UIButton.ButtonType.custom)
+        bt.translatesAutoresizingMaskIntoConstraints = false
+        //   bt.backgroundColor = #colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1)
+        bt.setImage(#imageLiteral(resourceName: "pencil-in-black-circular-interface-button"), for: UIControl.State.normal)
+        return bt
+    }()
+    let nameLabel: UILabel = {
+        let lb = UILabel()
+      //    lb.backgroundColor = #colorLiteral(red: 0.9411764741, green: 0.4980392158, blue: 0.3529411852, alpha: 1)
+        lb.text = "Bill Gates"
+        lb.font = UIFont.boldSystemFont(ofSize: 15)
+        lb.textColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
+        lb.translatesAutoresizingMaskIntoConstraints = false
+        return lb
+    }()
+    let addressLabel: UILabel = {
+        let lb = UILabel()
+       //  lb.backgroundColor = #colorLiteral(red: 0.9529411793, green: 0.6862745285, blue: 0.1333333403, alpha: 1)
+        lb.textColor = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)
+        lb.text = "BillGates@outlook.com"
+        lb.font = UIFont(name: lb.font.fontName, size: 14)
+        lb.translatesAutoresizingMaskIntoConstraints = false
+        return lb
+    }()
+    let phoneNumberLabel: UILabel = {
+        let lb = UILabel()
+       //    lb.backgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        lb.textColor = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)
+        lb.text = "0123456789"
+        lb.translatesAutoresizingMaskIntoConstraints = false
+        lb.font = UIFont(name: lb.font.fontName, size: 14)
+        return lb
+    }()
+    func setUpView(){
+        addSubview(addressLabel)
+        addressLabel.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        addressLabel.widthAnchor.constraint(equalToConstant: 215).isActive = true
+        addressLabel.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        addressLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 16).isActive = true
+        
+        addSubview(nameLabel)
+        nameLabel.bottomAnchor.constraint(equalTo: addressLabel.topAnchor, constant: -1).isActive = true
+        nameLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 16).isActive = true
+        nameLabel.widthAnchor.constraint(equalToConstant: 215).isActive = true
+        nameLabel.heightAnchor.constraint(equalToConstant: 25).isActive = true
+        
+        addSubview(phoneNumberLabel)
+        phoneNumberLabel.topAnchor.constraint(equalTo: addressLabel.bottomAnchor, constant: 1).isActive = true
+        phoneNumberLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 16).isActive = true
+        phoneNumberLabel.widthAnchor.constraint(equalToConstant:215).isActive = true
+        phoneNumberLabel.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        
+        addSubview(editButton)
+        editButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -20).isActive = true
+        editButton.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        editButton.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        editButton.widthAnchor.constraint(equalToConstant: 30).isActive = true
+    }
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: UITableViewCell.CellStyle.subtitle, reuseIdentifier: reuseIdentifier)
-        self.backgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        setUpView()
     }
     
     required init?(coder aDecoder: NSCoder) {

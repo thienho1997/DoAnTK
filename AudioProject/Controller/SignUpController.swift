@@ -37,7 +37,7 @@ class SignUpController: UIViewController {
                     print(error!)
                     return
                 }
-                 let values = ["name":name,"email":email,"id":(user?.user.uid)!]
+                let values = ["name":name,"email":email,"id":(user?.user.uid)!,"urlImage":"https://profile.actionsprout.com/default.jpeg"]
                 let ref = Database.database().reference()
                 let userReference = ref.child("users").child((user?.user.uid)!)
                 userReference.updateChildValues(values as [String: Any], withCompletionBlock: { (error, data) in

@@ -293,7 +293,7 @@ class ProductController: UITableViewController {
         labelNumbe.backgroundColor = #colorLiteral(red: 0.5568627715, green: 0.3529411852, blue: 0.9686274529, alpha: 1)
         labelNumbe.layer.cornerRadius = 7
         labelNumbe.clipsToBounds = true
-        labelNumbe.text = "3"
+        labelNumbe.text = "0"
         labelNumbe.textAlignment = .center
         labelNumbe.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
         labelNumbe.font = UIFont(name: labelNumbe.font.fontName, size: 13)
