@@ -153,10 +153,12 @@ class AdminAddMenuController: UIViewController, UIImagePickerControllerDelegate,
         adminMenuController?.menus.remove(at: index!)
       if menu == nil {
         addAndEdit(menu: nil)
+        self.navigationController?.popViewController(animated: true)
         }
             else{
             if flag == 1 {
                 addAndEdit(menu: menu!)
+                self.navigationController?.popViewController(animated: true)
                 flag = 0
             }
             else{
@@ -171,7 +173,7 @@ class AdminAddMenuController: UIViewController, UIImagePickerControllerDelegate,
                 print(error!)
                 return
             }
-            
+            self.navigationController?.popViewController(animated: true)
         })
         }
         

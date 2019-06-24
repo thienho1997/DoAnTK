@@ -55,6 +55,36 @@ class OrderDetailController: UIViewController, UICollectionViewDelegate, UIColle
         cell.address = adrresses[indexPath.row]
         return cell
     }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let alertController = UIAlertController(title: "Thông báo", message: "Bạn có chắc chắn chọn địa chỉ này không", preferredStyle: UIAlertController.Style.alert)
+        let cancelAction = UIAlertAction(title: "Huỷ", style: UIAlertAction.Style.default, handler: {
+            (action : UIAlertAction!) -> Void in })
+        let agreeAction = UIAlertAction(title: "Đồng ý", style: UIAlertAction.Style.default, handler: { alert -> Void in
+            let timestamp = Int(Date().timeIntervalSince1970)
+            
+            // update carts
+            let refCarts = Database.database().reference().child("carts").childByAutoId()
+            for item in self.products {
+                let value = [item.id : item.numb!]
+                refCarts.updateChildValues(value)
+            }
+            
+            // update user bills
+            let address = self.adrresses[indexPath.row]
+            let uid = Auth.auth().currentUser?.uid
+            let refUserBills = Database.database().reference().child("user_bills").child(uid!).childByAutoId()
+            let valueBill = ["id": refUserBills.key! , "id_cart": refCarts.key! , "active": 1,"totalPrice": self.totalPrice!, "id_address":address.id!,"time_stamp": timestamp ] as [String: Any]
+            refUserBills.updateChildValues(valueBill)
+            
+            // remove user_cart
+            let refUserCart = Database.database().reference().child("users_cart")
+            refUserCart.removeValue()
+            self.navigationController?.popToRootViewController(animated: true)
+        })
+        alertController.addAction(agreeAction)
+        alertController.addAction(cancelAction)
+        self.present(alertController, animated: true, completion: nil)
+    }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return CGFloat(85)
     }
@@ -67,7 +97,7 @@ class OrderDetailController: UIViewController, UICollectionViewDelegate, UIColle
     {
         if tables[indexPath.item].time_stamp == 0
         {
-        let table_name = tables[indexPath.item].name
+        let table_name = tables[indexPath.item].name!
          let alertController = UIAlertController(title: "Thông báo", message: "Bạn có chắc chắn chọn bàn \(table_name) với giỏ hàng đã chọn không?", preferredStyle: UIAlertController.Style.alert)
         let cancelAction = UIAlertAction(title: "Huỷ", style: UIAlertAction.Style.default, handler: {
             (action : UIAlertAction!) -> Void in })
@@ -94,7 +124,9 @@ class OrderDetailController: UIViewController, UICollectionViewDelegate, UIColle
             // remove user_cart
             let refUserCart = Database.database().reference().child("users_cart")
             refUserCart.removeValue()
+            self.navigationController?.popToRootViewController(animated: true)
         })
+            
         alertController.addAction(agreeAction)
         alertController.addAction(cancelAction)
          self.present(alertController, animated: true, completion: nil)

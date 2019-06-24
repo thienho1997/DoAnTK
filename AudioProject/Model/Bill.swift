@@ -14,6 +14,7 @@ class Bill: NSObject{
     var active: NSNumber?
     var id_address: String?
     var totalPrice: String?
+    var time_stamp: NSNumber?
     init(dictionary: [String:AnyObject]){
         self.id_cart = dictionary["id_cart"] as? String
         self.id = dictionary["id"] as? String
@@ -21,5 +22,6 @@ class Bill: NSObject{
         self.active = dictionary["active"] as? NSNumber
         self.id_address = dictionary["id_address"] as? String
         self.totalPrice = dictionary["totalPrice"] as? String
+        self.time_stamp = dictionary["time_stamp"] as? NSNumber
     }
 }

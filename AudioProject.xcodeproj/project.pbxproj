@@ -13,9 +13,12 @@
 		F4332E2F22AFB0C5000C70BD /* AdminAddMenuController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4332E2E22AFB0C5000C70BD /* AdminAddMenuController.swift */; };
 		F4363B8822BA3C6500B9EC70 /* Address.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4363B8722BA3C6500B9EC70 /* Address.swift */; };
 		F448692022BF19AF002C1554 /* Bill.swift in Sources */ = {isa = PBXBuildFile; fileRef = F448691F22BF19AF002C1554 /* Bill.swift */; };
+		F448692222BF7606002C1554 /* BillDetailController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F448692122BF7606002C1554 /* BillDetailController.swift */; };
+		F448692422BF7906002C1554 /* CartCellNew.swift in Sources */ = {isa = PBXBuildFile; fileRef = F448692322BF7906002C1554 /* CartCellNew.swift */; };
 		F44D1AB322B7929F00133E91 /* OrderDetailController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44D1AB222B7929F00133E91 /* OrderDetailController.swift */; };
 		F45A6AE322BCEBCF008F0858 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45A6AE222BCEBCF008F0858 /* Table.swift */; };
 		F47112E822BE9AA90023AD54 /* HistoryController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F47112E722BE9AA90023AD54 /* HistoryController.swift */; };
+		F47505AD22BFE2C9005B3ADB /* PaymentCompleteController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F47505AC22BFE2C9005B3ADB /* PaymentCompleteController.swift */; };
 		F476C56922B55D5D005293FB /* AdminAddProductController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F476C56822B55D5C005293FB /* AdminAddProductController.swift */; };
 		F47BD5A82287005500296E6F /* Page.swift in Sources */ = {isa = PBXBuildFile; fileRef = F47BD5A72287005500296E6F /* Page.swift */; };
 		F48947AA22AD08DF00D85046 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F48947A922AD08DF00D85046 /* GoogleService-Info.plist */; };
@@ -54,9 +57,12 @@
 		F4332E2E22AFB0C5000C70BD /* AdminAddMenuController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminAddMenuController.swift; sourceTree = "<group>"; };
 		F4363B8722BA3C6500B9EC70 /* Address.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Address.swift; sourceTree = "<group>"; };
 		F448691F22BF19AF002C1554 /* Bill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bill.swift; sourceTree = "<group>"; };
+		F448692122BF7606002C1554 /* BillDetailController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillDetailController.swift; sourceTree = "<group>"; };
+		F448692322BF7906002C1554 /* CartCellNew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartCellNew.swift; sourceTree = "<group>"; };
 		F44D1AB222B7929F00133E91 /* OrderDetailController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderDetailController.swift; sourceTree = "<group>"; };
 		F45A6AE222BCEBCF008F0858 /* Table.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Table.swift; sourceTree = "<group>"; };
 		F47112E722BE9AA90023AD54 /* HistoryController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryController.swift; sourceTree = "<group>"; };
+		F47505AC22BFE2C9005B3ADB /* PaymentCompleteController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentCompleteController.swift; sourceTree = "<group>"; };
 		F476C56822B55D5C005293FB /* AdminAddProductController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminAddProductController.swift; sourceTree = "<group>"; };
 		F47BD5A72287005500296E6F /* Page.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Page.swift; sourceTree = "<group>"; };
 		F48947A922AD08DF00D85046 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -150,6 +156,8 @@
 				F4315E0322B640D000170C5D /* ProfileController.swift */,
 				F44D1AB222B7929F00133E91 /* OrderDetailController.swift */,
 				F47112E722BE9AA90023AD54 /* HistoryController.swift */,
+				F448692122BF7606002C1554 /* BillDetailController.swift */,
+				F47505AC22BFE2C9005B3ADB /* PaymentCompleteController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -206,6 +214,7 @@
 				F48947B122AD229600D85046 /* NewsCell.swift */,
 				F48947B922AD244100D85046 /* MenuCell.swift */,
 				F48947BF22AD254F00D85046 /* ProductCell.swift */,
+				F448692322BF7906002C1554 /* CartCellNew.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -342,6 +351,7 @@
 				F4315E0422B640D000170C5D /* ProfileController.swift in Sources */,
 				F48947BA22AD244100D85046 /* MenuCell.swift in Sources */,
 				F4CCCA572282D79C00A705D8 /* ViewController.swift in Sources */,
+				F448692422BF7906002C1554 /* CartCellNew.swift in Sources */,
 				F493A53A22AF52AE00459630 /* AdminMenuController.swift in Sources */,
 				F448692022BF19AF002C1554 /* Bill.swift in Sources */,
 				F48947AE22AD1CF200D85046 /* ButtonHome.swift in Sources */,
@@ -354,10 +364,12 @@
 				F4332E2F22AFB0C5000C70BD /* AdminAddMenuController.swift in Sources */,
 				F48947B622AD23EE00D85046 /* MenuController.swift in Sources */,
 				F48947B222AD229600D85046 /* NewsCell.swift in Sources */,
+				F448692222BF7606002C1554 /* BillDetailController.swift in Sources */,
 				F476C56922B55D5D005293FB /* AdminAddProductController.swift in Sources */,
 				F48947B422AD23DB00D85046 /* CustomTabBarController.swift in Sources */,
 				F47BD5A82287005500296E6F /* Page.swift in Sources */,
 				F4306ED022B50820002445B5 /* AdminProductController.swift in Sources */,
+				F47505AD22BFE2C9005B3ADB /* PaymentCompleteController.swift in Sources */,
 				F48947BE22AD251500D85046 /* Product.swift in Sources */,
 				F48947AC22AD1C4C00D85046 /* HomeController.swift in Sources */,
 				F48947B822AD241600D85046 /* Menu.swift in Sources */,

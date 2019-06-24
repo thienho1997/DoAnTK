@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import Firebase
 class ProductCell: UITableViewCell {
-    
+    var productController: ProductController?
     var product_m: Product? {
         didSet{
             imageViewLeft.loadImageUsingCacheWithUrlString(urlString: (product_m?.imageUrl)!)
@@ -47,10 +47,25 @@ class ProductCell: UITableViewCell {
         return lb
     }()
     @objc func addProductToCartDatabase(){
-        let numbNSNumber = NSNumber(integerLiteral: 1)
-        let userId = Auth.auth().currentUser?.uid
+            // var numbNSNumber = NSNumber(integerLiteral: numb)
+            let userId = Auth.auth().currentUser?.uid
         let ref = Database.database().reference().child("users_cart").child(userId!).child(product_m!.id!)
-        ref.setValue(numbNSNumber)
+            ref.observeSingleEvent(of: DataEventType.value) { (snapShot) in
+                if let numOld = snapShot.value as? Int {
+                    let numNew = 1 + numOld
+                    let numbNSNumber = NSNumber(integerLiteral: numNew)
+                    ref.setValue(numbNSNumber)
+                }
+                else {
+                     ref.setValue(1)
+                }
+            }
+        
+        let alertController = UIAlertController(title: "Thông báo", message: "Thêm giỏ hàng thành công", preferredStyle: UIAlertController.Style.alert)
+        let cancelAction = UIAlertAction(title: "Đồng ý", style: UIAlertAction.Style.default, handler: {
+            (action : UIAlertAction!) -> Void in })
+        alertController.addAction(cancelAction)
+        productController!.present(alertController, animated: true, completion: nil)
     }
     lazy var addButton: UIButton = {
         let bt = UIButton(type: UIButton.ButtonType.system)

@@ -187,10 +187,12 @@ class AdminAddProductController: UIViewController, UIImagePickerControllerDelega
         adminProductController?.products.remove(at: index!)
         if product == nil {
             addAndEdit(product: nil)
+            self.navigationController?.popViewController(animated: true)
         }
         else{
             if flag == 1 {
                 addAndEdit(product: product!)
+                self.navigationController?.popViewController(animated: true)
                 flag = 0
             }
             else{
@@ -208,6 +210,7 @@ class AdminAddProductController: UIViewController, UIImagePickerControllerDelega
                     }
                     let refFather = Database.database().reference().child("products").child(ref.key!)
                     refFather.updateChildValues(values)
+                    self.navigationController?.popViewController(animated: true)
                 })
             }
             

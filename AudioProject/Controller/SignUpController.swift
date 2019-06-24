@@ -103,6 +103,7 @@ class SignUpController: UIViewController {
         let tf = UITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.placeholder =  "Password"
+        tf.isSecureTextEntry = true
         tf.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
         return tf
     }()
@@ -116,6 +117,7 @@ class SignUpController: UIViewController {
         let tf = UITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.placeholder =  "Confirm password"
+        tf.isSecureTextEntry = true
         tf.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
         return tf
     }()

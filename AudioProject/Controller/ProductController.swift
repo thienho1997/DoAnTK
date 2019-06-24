@@ -80,6 +80,7 @@ class ProductController: UITableViewController {
                         self.productsCart.remove(at: i)
                         self.productsCart.append(product)
                         self.labelNumberForCart.text = "\(numberOfProductInCart)"
+                        
                         return
                     }
                 }
@@ -219,6 +220,12 @@ class ProductController: UITableViewController {
     @objc func addToCartAction(){
         let numb = Int(labelNumber.text!)
         addProductToCartDatabase(product: productSelected!, numb: numb!)
+        outOfBlackView()
+        let alertController = UIAlertController(title: "Thông báo", message: "Thêm giỏ hàng thành công", preferredStyle: UIAlertController.Style.alert)
+        let cancelAction = UIAlertAction(title: "Đồng ý", style: UIAlertAction.Style.default, handler: {
+            (action : UIAlertAction!) -> Void in })
+        alertController.addAction(cancelAction)
+        self.present(alertController, animated: true, completion: nil)
     }
     lazy var viewForDetailProduct: UIView = {
         let v = UIView()
@@ -328,10 +335,21 @@ class ProductController: UITableViewController {
         return v
     }()
     func addProductToCartDatabase(product: Product, numb: Int){
-        let numbNSNumber = NSNumber(integerLiteral: numb)
+
+       // var numbNSNumber = NSNumber(integerLiteral: numb)
         let userId = Auth.auth().currentUser?.uid
         let ref = Database.database().reference().child("users_cart").child(userId!).child(product.id!)
-        ref.setValue(numbNSNumber)
+        ref.observeSingleEvent(of: DataEventType.value) { (snapShot) in
+            if let numOld = snapShot.value as? Int {
+                let numNew = numb + numOld
+                let numbNSNumber = NSNumber(integerLiteral: numNew)
+                ref.setValue(numbNSNumber)
+            }
+            else {
+                ref.setValue(numb)
+            }
+        }
+        
     }
     @objc func cartTap(){
         let cartController = CartViewController()
@@ -384,6 +402,7 @@ class ProductController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! ProductCell
         cell.product_m = products[indexPath.row]
+        cell.productController = self
         return cell
     }
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

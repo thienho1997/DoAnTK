@@ -57,6 +57,7 @@ class CartViewController: UIViewController, UITableViewDelegate, UITableViewData
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! CartCellNew
         cell.product = products[indexPath.row]
+        cell.cartController = self
         return cell
     }
     let cellId = "cellId"
@@ -166,91 +167,4 @@ class CartViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     */
 
-}
-class CartCellNew: UITableViewCell {
-    var product: Product? {
-        didSet {
-            let currencyFormatter = NumberFormatter()
-            currencyFormatter.usesGroupingSeparator = true
-            currencyFormatter.numberStyle = .decimal
-            imageLeft.loadImageUsingCacheWithUrlString(urlString: (product?.imageUrl)!)
-            labelDishName.text = "\(product!.numb!)x" + product!.title!
-            labelDetailPrice.text = "\(product!.numb!)x" + currencyFormatter.string(from: (product?.price)!)! + "đ"
-        }
-    }
-    let imageLeft: UIImageView = {
-        let iv = UIImageView()
-        iv.translatesAutoresizingMaskIntoConstraints = false
-      //  iv.backgroundColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
-        return iv
-    }()
-    let labelDishName: UILabel = {
-        let lb = UILabel()
-        lb.font = UIFont.boldSystemFont(ofSize: 17)
-        lb.translatesAutoresizingMaskIntoConstraints = false
-      //  lb.backgroundColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
-        return lb
-    }()
-    let labelDetailPrice: UILabel = {
-        let lb = UILabel()
-        lb.font = UIFont(name: lb.font.fontName, size: 15)
-        lb.translatesAutoresizingMaskIntoConstraints = false
-      //  lb.backgroundColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
-        return lb
-    }()
-    let buttonEdit: UIButton = {
-        let bt = UIButton(type: UIButton.ButtonType.custom)
-        bt.translatesAutoresizingMaskIntoConstraints = false
-        bt.setImage(#imageLiteral(resourceName: "iconfinder_brush-pencil_1055103"), for: UIControl.State.normal)
-       // bt.backgroundColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
-        return bt
-    }()
-    let buttonRemove: UIButton = {
-        let bt = UIButton(type: UIButton.ButtonType.custom)
-        bt.translatesAutoresizingMaskIntoConstraints = false
-        bt.setImage(#imageLiteral(resourceName: "iconfinder_flat-style-circle-delete-trash_1312512"), for: UIControl.State.normal)
-      //  bt.backgroundColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
-        return bt
-    }()
-    func setUpView(){
-        addSubview(imageLeft)
-        imageLeft.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-        imageLeft.leftAnchor.constraint(equalTo: leftAnchor,constant: 12).isActive = true
-        imageLeft.heightAnchor.constraint(equalToConstant: 60).isActive = true
-        imageLeft.widthAnchor.constraint(equalToConstant: 60).isActive = true
-        
-        addSubview(labelDishName)
-        labelDishName.bottomAnchor.constraint(equalTo: centerYAnchor, constant: 0).isActive = true
-        labelDishName.leftAnchor.constraint(equalTo: imageLeft.rightAnchor, constant: 8).isActive = true
-        labelDishName.widthAnchor.constraint(equalToConstant: 200).isActive = true
-        labelDishName.heightAnchor.constraint(equalToConstant: 25).isActive = true
-        
-        addSubview(labelDetailPrice)
-        labelDetailPrice.topAnchor.constraint(equalTo: centerYAnchor, constant: 0).isActive = true
-        labelDetailPrice.leftAnchor.constraint(equalTo: imageLeft.rightAnchor, constant: 8).isActive = true
-        labelDetailPrice.widthAnchor.constraint(equalToConstant: 200).isActive = true
-        labelDetailPrice.heightAnchor.constraint(equalToConstant: 25).isActive = true
-        
-        addSubview(buttonEdit)
-        buttonEdit.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-        buttonEdit.leftAnchor.constraint(equalTo: labelDishName.rightAnchor, constant: 16).isActive = true
-        buttonEdit.heightAnchor.constraint(equalToConstant: 40).isActive = true
-        buttonEdit.widthAnchor.constraint(equalToConstant: 40).isActive = true
-        
-        addSubview(buttonRemove)
-        buttonRemove.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-        buttonRemove.leftAnchor.constraint(equalTo: buttonEdit.rightAnchor, constant: 12).isActive = true
-        buttonRemove.heightAnchor.constraint(equalToConstant: 40).isActive = true
-        buttonRemove.widthAnchor.constraint(equalToConstant: 40).isActive = true
-        
-    }
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: UITableViewCell.CellStyle.subtitle, reuseIdentifier: reuseIdentifier)
-        setUpView()
-        self.backgroundColor = #colorLiteral(red: 0.9144216313, green: 0.9144216313, blue: 0.9144216313, alpha: 1)
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
 }

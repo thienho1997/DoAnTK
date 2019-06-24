@@ -66,6 +66,7 @@ class LoginPage: UICollectionViewCell {
         let tf = UITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.placeholder =  "Your password"
+        tf.isSecureTextEntry = true
         tf.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
         return tf
     }()
