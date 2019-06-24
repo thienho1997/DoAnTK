@@ -72,6 +72,30 @@ class CartCellNew: UITableViewCell {
                 }
             }
             
+            
+            let userId = Auth.auth().currentUser?.uid
+            var total = 0
+            let refUserCart = Database.database().reference().child("users_cart").child(userId!)
+            refUserCart.observe(DataEventType.childAdded) { (snapShot) in
+                let product_id = snapShot.key
+                let numb = snapShot.value as! NSNumber
+                let refProduct = Database.database().reference().child("products").child(product_id)
+                refProduct.observeSingleEvent(of: DataEventType.value, with: { (snapShot) in
+                    let product = Product(dictionary: snapShot.value as! [String : Any])
+                    product.setNumb(numb: numb)
+                    total += Int(truncating: product.price!) * Int(numb)
+        
+                    // total label
+                    let currencyFormatter = NumberFormatter()
+                    currencyFormatter.usesGroupingSeparator = true
+                    currencyFormatter.numberStyle = .decimal
+                    self.cartController!.lableTotalPrice.text = "Total: " + currencyFormatter.string(from: NSNumber(integerLiteral: total))! + "đ"
+                })
+                
+                
+            }
+            
+            
         })
         alertController.addAction(agreeAction)
         alertController.addAction(cancelAction)
@@ -104,6 +128,28 @@ class CartCellNew: UITableViewCell {
             
             let ref = Database.database().reference().child("users_cart").child(uid!).child(self.product!.id!)
             ref.removeValue()
+            let userId = Auth.auth().currentUser?.uid
+            var total = 0
+            let refUserCart = Database.database().reference().child("users_cart").child(userId!)
+            refUserCart.observe(DataEventType.childAdded) { (snapShot) in
+                let product_id = snapShot.key
+                let numb = snapShot.value as! NSNumber
+                let refProduct = Database.database().reference().child("products").child(product_id)
+                refProduct.observeSingleEvent(of: DataEventType.value, with: { (snapShot) in
+                    let product = Product(dictionary: snapShot.value as! [String : Any])
+                    product.setNumb(numb: numb)
+                    total += Int(truncating: product.price!) * Int(numb)
+                    
+                    // total label
+                    let currencyFormatter = NumberFormatter()
+                    currencyFormatter.usesGroupingSeparator = true
+                    currencyFormatter.numberStyle = .decimal
+                    self.cartController!.lableTotalPrice.text = "Total: " + currencyFormatter.string(from: NSNumber(integerLiteral: total))! + "đ"
+                })
+                
+                
+            }
+            
         })
         alertController.addAction(agreeAction)
         alertController.addAction(cancelAction)

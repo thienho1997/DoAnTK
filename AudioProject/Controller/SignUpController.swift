@@ -45,7 +45,14 @@ class SignUpController: UIViewController {
                         print(error)
                         return
                     }
-                    print("successful")
+                    let alertController = UIAlertController(title: "Thông báo", message: "Đăng ký thành công", preferredStyle: UIAlertController.Style.alert)
+                    let cancelAction = UIAlertAction(title: "Đồng ý", style: UIAlertAction.Style.default, handler: {
+                        (action : UIAlertAction!) -> Void in
+                        self.dismiss(animated: true, completion: nil)
+                    })
+                    alertController.addAction(cancelAction)
+                    self.present(alertController, animated: true, completion: nil)
+                    
                 })
             }
         }

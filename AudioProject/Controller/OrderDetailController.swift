@@ -73,7 +73,7 @@ class OrderDetailController: UIViewController, UICollectionViewDelegate, UIColle
             let address = self.adrresses[indexPath.row]
             let uid = Auth.auth().currentUser?.uid
             let refUserBills = Database.database().reference().child("user_bills").child(uid!).childByAutoId()
-            let valueBill = ["id": refUserBills.key! , "id_cart": refCarts.key! , "active": 1,"totalPrice": self.totalPrice!, "id_address":address.id!,"time_stamp": timestamp ] as [String: Any]
+            let valueBill = ["id": refUserBills.key! , "id_cart": refCarts.key! , "active": 0,"totalPrice": self.totalPrice!, "id_address":address.id!,"time_stamp": timestamp ] as [String: Any]
             refUserBills.updateChildValues(valueBill)
             
             // remove user_cart
@@ -391,6 +391,7 @@ class TableCell: UICollectionViewCell {
                 labelTime.text = "Available"
             }
             else{
+                 backgroundColor = #colorLiteral(red: 0.8078431487, green: 0.02745098062, blue: 0.3333333433, alpha: 1)
                 if let seconds = table?.time_stamp?.doubleValue {
                     let secondDistance = Int(Date().timeIntervalSince1970) - Int(seconds)
                 let (h,m,s) = secondsToHoursMinutesSeconds (seconds : secondDistance)
